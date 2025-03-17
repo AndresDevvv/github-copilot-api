@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GitHub Copilot API - Test UI</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+</head>
+<body>
+  <div class="container">
+    <header class="my-4 text-center">
+      <h1>GitHub Copilot API Test UI</h1>
+      <p class="lead">Test the GitHub Copilot API integration</p>
+    </header>
+
+    <div class="row">
+      <div class="col-md-12">
+        <div class="card mb-4">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h2 class="mb-0">Authentication</h2>
+            <span id="auth-status" class="badge bg-secondary">Not Authenticated</span>
+          </div>
+          <div class="card-body">
+            <ul class="nav nav-tabs" id="auth-tabs" role="tablist">
+              <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="github-tab" data-bs-toggle="tab" data-bs-target="#github-auth" type="button" role="tab">GitHub Token</button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" id="device-tab" data-bs-toggle="tab" data-bs-target="#device-auth" type="button" role="tab">Device Code</button>
+              </li>
+            </ul>
+            
+            <div class="tab-content p-3" id="auth-tabs-content">
+              
+              <div class="tab-pane fade show active" id="github-auth" role="tabpanel">
+                <form id="github-auth-form">
+                  <div class="mb-3">
+                    <label for="github-token" class="form-label">GitHub Token</label>
+                    <input type="password" class="form-control" id="github-token" placeholder="gho_your_token_here">
+                    <div class="form-text">Enter your GitHub personal access token</div>
+                  </div>
+                  <button type="submit" class="btn btn-primary">Authenticate</button>
+                </form>
+              </div>
+              
+              
+              <div class="tab-pane fade" id="device-auth" role="tabpanel">
+                <div id="device-code-start">
+                  <p>Use device code flow to authenticate without sharing your GitHub token.</p>
+                  <button id="start-device-flow" class="btn btn-primary">Start Device Flow</button>
+                </div>
+                
+                <div id="device-code-prompt" class="d-none">
+                  <div class="alert alert-info">
+                    <p>Go to <a href="https://github.com/login/device" target="_blank">https://github.com/login/device</a> and enter this code:</p>
+                    <h3 id="user-code" class="text-center user-select-all"></h3>
+                  </div>
+                  <div class="d-grid gap-2 mb-3">
+                    <button id="check-device-flow" class="btn btn-success">I've entered the code - Check status</button>
+                    <button id="cancel-device-flow" class="btn btn-outline-secondary">Cancel</button>
+                  </div>
+                  <div id="device-flow-status" class="alert alert-secondary d-none">
+                    <div class="spinner-border spinner-border-sm text-primary me-2" role="status">
+                      <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <span id="device-flow-message">Checking authentication status...</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        
+        <div class="card mb-4">
+          <div class="card-header">
+            <h2 class="mb-0">Available Models</h2>
+          </div>
+          <div class="card-body">
+            <button id="fetch-models" class="btn btn-primary mb-3" disabled>Fetch Models</button>
+            <div id="models-container">
+              <p class="text-muted">Authenticate first to fetch available models. (Based on pricing plan)</p>
+            </div>
+          </div>
+        </div>
+        
+        
+        <div class="card mb-4">
+          <div class="card-header">
+            <h2 class="mb-0">Chat Completion</h2>
+          </div>
+          <div class="card-body">
+            <form id="chat-form">
+              <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                  <label for="model-select" class="form-label">Model</label>
+                  <select id="model-select" class="form-select" disabled>
+                    <option value="">Select a model</option>
+                  </select>
+                </div>
+                <div class="col-md-2">
+                  <label for="temperature" class="form-label">Temperature</label>
+                  <input type="number" class="form-control" id="temperature" min="0" max="1" step="0.1" value="0.1">
+                </div>
+                <div class="col-md-2">
+                  <label for="top-p" class="form-label">Top P</label>
+                  <input type="number" class="form-control" id="top-p" min="0" max="1" step="0.1" value="1.0">
+                </div>
+                <div class="col-md-2">
+                  <label for="max-tokens" class="form-label">Max Tokens</label>
+                  <input type="number" class="form-control" id="max-tokens" min="1" value="4096">
+                </div>
+              </div>
+              
+              <div class="mb-3">
+                <label for="system-message" class="form-label">System Message</label>
+                <textarea class="form-control" id="system-message" rows="2">You are an AI programming assistant. You are helpful, concise, and write correct, well-documented code.</textarea>
+              </div>
+              
+              <div class="mb-3">
+                <label for="user-message" class="form-label">User Message</label>
+                <textarea class="form-control" id="user-message" rows="3" placeholder="Type your message here..." required></textarea>
+              </div>
+              
+              <div class="d-grid">
+                <button type="submit" class="btn btn-success btn-lg" disabled>Send Message</button>
+              </div>
+            </form>
+            
+            <div id="response-container" class="mt-4 d-none">
+              <h3>Response</h3>
+              <div id="response-loading" class="text-center">
+                <div class="spinner-border text-primary" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+                <p>Generating response...</p>
+              </div>
+              <div id="response-content" class="border rounded p-3 bg-light"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="scripts.js"></script>
+</body>
+</html> 
