@@ -29,10 +29,18 @@ const handleChatCompletion = (req, res) => {
   };
   
   const onComplete = () => {
-    res.write('data: [DONE]\n\n');
-    res.end();
+    try {
+      if (!res.writableEnded && !res.finished) {
+        res.write('data: [DONE]\n\n');
+        res.end();
+      }
+    } catch (error) {
+      console.error('Error writing to response stream:', error.message);
+      if (!res.writableEnded && !res.finished) {
+        res.end();
+      }
+    }
   };
-  
   
   sendChatCompletion(chatData, onData, onError, onComplete);
 };
